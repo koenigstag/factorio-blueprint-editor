@@ -1,27 +1,110 @@
+import { Container, Text } from 'pixi.js'
 import { Entity } from '../../core/Entity'
-import { styles } from '../style'
+import { ICondition } from '../../types'
 import { TextInput } from '../controls/TextInput'
 import { Checkbox } from '../controls/Checkbox'
+import F from '../controls/functions'
+import { styles } from '../style'
 import { Editor } from './Editor'
 import { DisplayPanelIcon } from './components/DisplayPanelIcon'
 import G from '../../common/globals'
 
+const ROW_HEIGHT = 26
+const MAX_ROWS = 20
+const ROW_WIDTH = 296
+const CONDITION_ICON_SIZE = 18
+const ICON_COL_WIDTH = 24
+const COMPARATOR_COL_WIDTH = 18
+const VALUE_COL_WIDTH = 40
+const CONDITION_WIDTH = ICON_COL_WIDTH + COMPARATOR_COL_WIDTH + VALUE_COL_WIDTH
+
+function createConditionDisplay(condition: ICondition): Container {
+    const container = new Container()
+    if (!condition || !condition.first_signal) return container
+
+    const icon = F.CreateIcon(condition.first_signal.name, CONDITION_ICON_SIZE)
+    icon.position.set(ICON_COL_WIDTH / 2, CONDITION_ICON_SIZE / 2)
+    container.addChild(icon)
+
+    const comparatorLabel = new Text({
+        text: condition.comparator || '<',
+        style: styles.dialog.label,
+    })
+    comparatorLabel.position.set(ICON_COL_WIDTH, (CONDITION_ICON_SIZE - comparatorLabel.height) / 2)
+    container.addChild(comparatorLabel)
+
+    const valueX = ICON_COL_WIDTH + COMPARATOR_COL_WIDTH
+    if (condition.second_signal && condition.second_signal.name) {
+        const secondIcon = F.CreateIcon(condition.second_signal.name, CONDITION_ICON_SIZE)
+        secondIcon.position.set(valueX + CONDITION_ICON_SIZE / 2, CONDITION_ICON_SIZE / 2)
+        container.addChild(secondIcon)
+    } else {
+        const constLabel = new Text({
+            text: `${condition.constant ?? 0}`,
+            style: styles.dialog.label,
+        })
+        constLabel.position.set(valueX, (CONDITION_ICON_SIZE - constLabel.height) / 2)
+        container.addChild(constLabel)
+    }
+
+    return container
+}
+
 /** Display Panel Editor */
 export class DisplayPanelEditor extends Editor {
     public constructor(entity: Entity) {
-        super(320, 214, entity)
+        const allParameters = entity.displayPanelParameters || []
+        const parameters = allParameters.slice(0, MAX_ROWS)
+        const connected = !!entity.generateConnector
+        const rowCount = parameters.length + (allParameters.length > MAX_ROWS ? 1 : 0)
+        const height = connected ? 222 + rowCount * ROW_HEIGHT : 214
 
-        if (entity.generateConnector) {
-            const style = styles.dialog.label.clone()
-            style.wordWrap = true
-            style.wordWrapWidth = 160
-            const label = this.addLabel(
-                140,
-                60,
-                'Circuit network settings are not implemented yet',
-                style
-            )
-            label.position.set(140, 102 - label.height / 2)
+        super(320, height, entity)
+
+        const alwaysShow = new Checkbox(
+            entity.displayPanelAlwaysShow,
+            "Always show text in 'Alt-mode'"
+        )
+        alwaysShow.position.set(12, connected ? 160 : 168)
+        this.addChild(alwaysShow)
+
+        alwaysShow.on('changed', () => {
+            this.m_Entity.displayPanelAlwaysShow = alwaysShow.checked
+        })
+
+        this.onEntityChange('displayPanelAlwaysShow', alwaysShowValue => {
+            alwaysShow.checked = alwaysShowValue
+        })
+
+        if (connected) {
+            this.addLabel(12, 190, 'Conditions (read only):')
+            parameters.forEach((param, i) => {
+                const row = new Container()
+                row.position.set(12, 210 + i * ROW_HEIGHT)
+
+                if (param.icon && param.icon.name) {
+                    const icon = F.CreateIcon(param.icon.name, 20)
+                    icon.position.set(10, 10)
+                    row.addChild(icon)
+                }
+
+                const text = param.text ? `"${param.text}"` : ''
+                const textLabel = this.addLabel(24, 4, text)
+                row.addChild(textLabel)
+
+                const conditionDisplay = createConditionDisplay(param.condition)
+                conditionDisplay.position.x = ROW_WIDTH - CONDITION_WIDTH
+                row.addChild(conditionDisplay)
+
+                this.addChild(row)
+            })
+            if (allParameters.length > MAX_ROWS) {
+                this.addLabel(
+                    12,
+                    210 + parameters.length * ROW_HEIGHT,
+                    `+${allParameters.length - MAX_ROWS} more`
+                )
+            }
             return
         }
 
@@ -41,21 +124,6 @@ export class DisplayPanelEditor extends Editor {
 
         this.onEntityChange('displayPanelText', text => {
             textInput.text = text || ''
-        })
-
-        const alwaysShow = new Checkbox(
-            entity.displayPanelAlwaysShow,
-            "Always show text in 'Alt-mode'"
-        )
-        alwaysShow.position.set(12, 168)
-        this.addChild(alwaysShow)
-
-        alwaysShow.on('changed', () => {
-            this.m_Entity.displayPanelAlwaysShow = alwaysShow.checked
-        })
-
-        this.onEntityChange('displayPanelAlwaysShow', alwaysShowValue => {
-            alwaysShow.checked = alwaysShowValue
         })
     }
 }

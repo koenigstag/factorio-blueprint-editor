@@ -8,6 +8,7 @@ import {
     ComparatorString,
     ArithmeticOperation,
     ISignal,
+    ICondition,
     SelectorCombinatorOperation,
 } from '../types'
 import util from '../common/util'
@@ -1039,6 +1040,16 @@ export class Entity extends EventEmitter<EntityEvents> {
             )
             .onDone(() => this.emit('displayPanelAlwaysShow', this.displayPanelAlwaysShow))
             .commit()
+    }
+
+    /** Read-only list of {icon, text, condition} entries used when connected to a circuit network */
+    public get displayPanelParameters(): {
+        text?: string
+        icon?: ISignal
+        condition?: ICondition
+    }[] {
+        if (this.type !== 'display-panel') return undefined
+        return this.m_rawEntity.control_behavior?.parameters
     }
 
     public get mayCraftWithFluid(): boolean {
