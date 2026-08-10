@@ -47,7 +47,7 @@ export class DisplayPanelEditor extends Editor {
             entity.displayPanelAlwaysShow,
             'Always show text above entity'
         )
-        alwaysShow.position.set(140, 160)
+        alwaysShow.position.set(12, 168)
         this.addChild(alwaysShow)
 
         alwaysShow.on('changed', () => {
