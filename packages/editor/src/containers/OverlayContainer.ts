@@ -572,13 +572,14 @@ function createDisplayPanelLabel(text: string): Container {
     })
     label.anchor.set(0.5, 1)
 
-    const padding = 6
+    const paddingX = 10
+    const paddingY = 6
     const background = new Graphics()
         .roundRect(
-            -label.width / 2 - padding,
-            -label.height - padding * 2,
-            label.width + padding * 2,
-            label.height + padding * 2,
+            -label.width / 2 - paddingX,
+            -label.height - paddingY,
+            label.width + paddingX * 2,
+            label.height + paddingY * 2,
             3
         )
         .fill({ color: 0x000000, alpha: 0.6 })
