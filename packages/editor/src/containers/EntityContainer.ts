@@ -116,6 +116,7 @@ export class EntityContainer {
         this.m_Entity.on('splitterOutputPriority', this.redrawEntityInfo, this)
         this.m_Entity.on('displayPanelIcon', onDisplayPanelIconChange)
         this.m_Entity.on('displayPanelText', this.redrawEntityInfo, this)
+        this.m_Entity.on('displayPanelAlwaysShow', this.redrawEntityInfo, this)
 
         this.m_Entity.on('destroy', onEntityDestroy)
 
@@ -131,6 +132,7 @@ export class EntityContainer {
             this.m_Entity.off('splitterOutputPriority', this.redrawEntityInfo, this)
             this.m_Entity.off('displayPanelIcon', onDisplayPanelIconChange)
             this.m_Entity.off('displayPanelText', this.redrawEntityInfo, this)
+            this.m_Entity.off('displayPanelAlwaysShow', this.redrawEntityInfo, this)
 
             this.m_Entity.off('destroy', onEntityDestroy)
         })
@@ -271,7 +273,8 @@ export class EntityContainer {
             this.m_Entity.type === 'arithmetic-combinator' ||
             this.m_Entity.type === 'decider-combinator' ||
             this.m_Entity.type === 'inserter' ||
-            this.m_Entity.type === 'logistic-container'
+            this.m_Entity.type === 'logistic-container' ||
+            this.m_Entity.type === 'display-panel'
         ) {
             if (this.entityInfo !== undefined) {
                 this.entityInfo.destroy()
