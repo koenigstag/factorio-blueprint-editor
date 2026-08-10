@@ -34,7 +34,7 @@ export class EntitySprite extends Sprite {
     private static nextID = 0
 
     private id: number
-    private __zIndex: number
+    private __zIndex = 0
     private zOrder: number
     private readonly entityPos: IPoint
 
@@ -183,9 +183,11 @@ export class EntitySprite extends Sprite {
                 entity.type === 'underground-belt' ||
                 entity.type === 'loader'
             ) {
-                if (!foundMainBelt && data.filename.includes('transport-belt')) {
+                if (data.filename.includes('transport-belt')) {
+                    sprite.__zIndex = foundMainBelt ? -5 : -6
                     foundMainBelt = true
-                    sprite.__zIndex = -6
+                } else {
+                    sprite.__zIndex = 0
                 }
             } else {
                 sprite.__zIndex = 0
