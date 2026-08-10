@@ -115,6 +115,7 @@ export class EntityContainer {
         this.m_Entity.on('splitterInputPriority', this.redrawEntityInfo, this)
         this.m_Entity.on('splitterOutputPriority', this.redrawEntityInfo, this)
         this.m_Entity.on('displayPanelIcon', onDisplayPanelIconChange)
+        this.m_Entity.on('displayPanelText', this.redrawEntityInfo, this)
 
         this.m_Entity.on('destroy', onEntityDestroy)
 
@@ -129,6 +130,7 @@ export class EntityContainer {
             this.m_Entity.off('splitterInputPriority', this.redrawEntityInfo, this)
             this.m_Entity.off('splitterOutputPriority', this.redrawEntityInfo, this)
             this.m_Entity.off('displayPanelIcon', onDisplayPanelIconChange)
+            this.m_Entity.off('displayPanelText', this.redrawEntityInfo, this)
 
             this.m_Entity.off('destroy', onEntityDestroy)
         })
@@ -286,6 +288,7 @@ export class EntityContainer {
 
         G.UI.updateEntityInfoPanel(this.m_Entity)
         this.visualizationArea.show()
+        G.BPC.overlayContainer.showEntityTooltip(this.m_Entity, this.position)
     }
 
     public pointerOutEventHandler(): void {
@@ -294,6 +297,7 @@ export class EntityContainer {
 
         G.UI.updateEntityInfoPanel(undefined)
         this.visualizationArea.hide()
+        G.BPC.overlayContainer.hideEntityTooltip()
     }
 
     private redrawSurroundingEntities(position: IPoint = this.m_Entity.position): void {

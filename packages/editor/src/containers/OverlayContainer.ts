@@ -1,4 +1,4 @@
-import { Container, Graphics, Sprite } from 'pixi.js'
+import { Container, Graphics, Sprite, Text, TextStyle } from 'pixi.js'
 import { IPoint } from '../types'
 import FD, {
     getFluidBoxes,
@@ -22,6 +22,7 @@ export class OverlayContainer extends Container {
     private readonly cursorBoxes = new Container()
     private readonly undergroundLines = new Container()
     private readonly selectionArea = new Graphics()
+    private readonly entityTooltip = new Container()
     private copyCursorBox: Container
     private selectionAreaUpdateFn: (endX: number, endY: number) => void
 
@@ -29,7 +30,27 @@ export class OverlayContainer extends Container {
         super()
         this.bpc = bpc
 
-        this.addChild(this.entityInfos, this.cursorBoxes, this.undergroundLines, this.selectionArea)
+        this.addChild(
+            this.entityInfos,
+            this.cursorBoxes,
+            this.undergroundLines,
+            this.selectionArea,
+            this.entityTooltip
+        )
+    }
+
+    public showEntityTooltip(entity: Entity, position: IPoint): void {
+        this.entityTooltip.removeChildren()
+
+        if (entity.type !== 'display-panel' || !entity.displayPanelText) return
+
+        const label = createDisplayPanelLabel(entity.displayPanelText)
+        label.position.set(position.x, position.y - 40)
+        this.entityTooltip.addChild(label)
+    }
+
+    public hideEntityTooltip(): void {
+        this.entityTooltip.removeChildren()
     }
 
     public static createEntityInfo(entity: Entity, position: IPoint): Container {
@@ -293,6 +314,19 @@ export class OverlayContainer extends Container {
             entityInfo.addChild(arrows)
         }
 
+        if (
+            entity.type === 'display-panel' &&
+            entity.displayPanelAlwaysShow &&
+            entity.displayPanelText
+        ) {
+            const firstLine = entity.displayPanelText.split('\n')[0]
+            if (firstLine) {
+                const label = createDisplayPanelLabel(firstLine)
+                label.position.set(0, -40)
+                entityInfo.addChild(label)
+            }
+        }
+
         if (entityInfo.children.length !== 0) {
             entityInfo.position.set(position.x, position.y)
             return entityInfo
@@ -524,4 +558,33 @@ export class OverlayContainer extends Container {
         this.selectionArea.clear()
         this.bpc.gridData.off('update', this.selectionAreaUpdateFn, this)
     }
+}
+
+/** Text label with a padded dark background, anchored at bottom-center of `position` */
+function createDisplayPanelLabel(text: string): Container {
+    const label = new Text({
+        text,
+        style: new TextStyle({
+            fontSize: 16,
+            fill: 0xffffff,
+            align: 'center',
+        }),
+    })
+    label.anchor.set(0.5, 1)
+
+    const padding = 6
+    const background = new Graphics()
+        .roundRect(
+            -label.width / 2 - padding,
+            -label.height - padding * 2,
+            label.width + padding * 2,
+            label.height + padding * 2,
+            3
+        )
+        .fill({ color: 0x000000, alpha: 0.6 })
+
+    const container = new Container()
+    container.addChild(background, label)
+    container.scale.set(0.5, 0.5)
+    return container
 }

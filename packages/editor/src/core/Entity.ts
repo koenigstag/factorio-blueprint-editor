@@ -62,6 +62,8 @@ export interface EntityEvents {
     station: []
     manualTrainsLimit: []
     displayPanelIcon: [icon: ISignal]
+    displayPanelText: [text: string]
+    displayPanelAlwaysShow: [alwaysShow: boolean]
 }
 
 /** Entity Base Class */
@@ -1005,6 +1007,37 @@ export class Entity extends EventEmitter<EntityEvents> {
         this.m_BP.history
             .updateValue(this.m_rawEntity, 'icon', icon, 'Change display panel icon')
             .onDone(() => this.emit('displayPanelIcon', this.displayPanelIcon))
+            .commit()
+    }
+
+    public get displayPanelText(): string {
+        if (this.type !== 'display-panel') return undefined
+        return this.m_rawEntity.text ?? this.m_rawEntity.control_behavior?.parameters?.[0]?.text
+    }
+    public set displayPanelText(text: string) {
+        if (this.m_rawEntity.text === text) return
+
+        this.m_BP.history
+            .updateValue(this.m_rawEntity, 'text', text, 'Change display panel text')
+            .onDone(() => this.emit('displayPanelText', this.displayPanelText))
+            .commit()
+    }
+
+    public get displayPanelAlwaysShow(): boolean {
+        if (this.type !== 'display-panel') return undefined
+        return !!this.m_rawEntity.always_show
+    }
+    public set displayPanelAlwaysShow(alwaysShow: boolean) {
+        if (!!this.m_rawEntity.always_show === alwaysShow) return
+
+        this.m_BP.history
+            .updateValue(
+                this.m_rawEntity,
+                'always_show',
+                alwaysShow || undefined,
+                'Change display panel always show'
+            )
+            .onDone(() => this.emit('displayPanelAlwaysShow', this.displayPanelAlwaysShow))
             .commit()
     }
 
