@@ -927,7 +927,7 @@ export class BlueprintContainer extends Container {
             }
         } catch (e) {
             console.error(e)
-            G.logger({ text: 'Could not start placing this item.', type: 'warning' })
+            G.logger({ text: 'Could not place this item.', type: 'warning' })
             return
         }
 
