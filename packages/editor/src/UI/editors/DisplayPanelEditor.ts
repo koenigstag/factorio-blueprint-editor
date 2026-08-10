@@ -1,14 +1,24 @@
 import { Entity } from '../../core/Entity'
+import { styles } from '../style'
 import { Editor } from './Editor'
 import { DisplayPanelIcon } from './components/DisplayPanelIcon'
 
 /** Display Panel Editor */
 export class DisplayPanelEditor extends Editor {
     public constructor(entity: Entity) {
-        super(280, 171, entity)
+        super(320, 171, entity)
 
         if (entity.generateConnector) {
-            this.addLabel(140, 90, 'Not implemented')
+            const style = styles.dialog.label.clone()
+            style.wordWrap = true
+            style.wordWrapWidth = 160
+            const label = this.addLabel(
+                140,
+                60,
+                'Circuit network settings are not implemented yet',
+                style
+            )
+            label.position.set(140, 102 - label.height / 2)
             return
         }
 
