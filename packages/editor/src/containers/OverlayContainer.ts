@@ -582,7 +582,7 @@ function createDisplayPanelLabel(text: string): Container {
             label.height + paddingY * 2,
             3
         )
-        .fill({ color: 0x000000, alpha: 0.6 })
+        .fill({ color: 0x000000, alpha: 0.4 })
 
     const container = new Container()
     container.addChild(background, label)
