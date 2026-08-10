@@ -288,7 +288,13 @@ export class EntityContainer {
 
         G.UI.updateEntityInfoPanel(this.m_Entity)
         this.visualizationArea.show()
-        G.BPC.overlayContainer.showEntityTooltip(this.m_Entity, this.position)
+
+        if (this.m_Entity.type === 'display-panel' && this.m_Entity.displayPanelText) {
+            if (this.entityInfo !== undefined) {
+                this.entityInfo.visible = false
+            }
+            G.BPC.overlayContainer.showEntityTooltip(this.m_Entity, this.position)
+        }
     }
 
     public pointerOutEventHandler(): void {
@@ -297,6 +303,10 @@ export class EntityContainer {
 
         G.UI.updateEntityInfoPanel(undefined)
         this.visualizationArea.hide()
+
+        if (this.entityInfo !== undefined) {
+            this.entityInfo.visible = true
+        }
         G.BPC.overlayContainer.hideEntityTooltip()
     }
 

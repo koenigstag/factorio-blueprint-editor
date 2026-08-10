@@ -45,7 +45,7 @@ export class OverlayContainer extends Container {
         if (entity.type !== 'display-panel' || !entity.displayPanelText) return
 
         const label = createDisplayPanelLabel(entity.displayPanelText)
-        label.position.set(position.x, position.y - 40)
+        label.position.set(position.x, position.y - 24)
         this.entityTooltip.addChild(label)
     }
 
@@ -575,14 +575,13 @@ function createDisplayPanelLabel(text: string): Container {
     const paddingX = 10
     const paddingY = 6
     const background = new Graphics()
-        .roundRect(
+        .rect(
             -label.width / 2 - paddingX,
             -label.height - paddingY,
             label.width + paddingX * 2,
-            label.height + paddingY * 2,
-            3
+            label.height + paddingY * 2
         )
-        .fill({ color: 0x000000, alpha: 0.4 })
+        .fill({ color: 0x000000, alpha: 0.25 })
 
     const container = new Container()
     container.addChild(background, label)
