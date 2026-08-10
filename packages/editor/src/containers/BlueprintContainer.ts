@@ -927,7 +927,11 @@ export class BlueprintContainer extends Container {
             }
         } catch (e) {
             console.error(e)
-            G.logger({ text: 'Could not place this item.', type: 'warning' })
+            const text =
+                e.message === 'Not implemented!'
+                    ? 'This entity is not supported yet.'
+                    : 'Could not place this item.'
+            G.logger({ text, type: 'warning' })
             return
         }
 
