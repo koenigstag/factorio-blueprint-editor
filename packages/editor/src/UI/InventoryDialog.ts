@@ -50,12 +50,41 @@ export class InventoryDialog extends Dialog {
     /** Hovered item for item pointerout check */
     private m_hoveredItem: string
 
+    /** Number of item-group tabs the fixed-width layout was designed for */
+    private static readonly BASE_WIDTH = 404
+
+    /** Determine whether an item qualifies for a group tab, mirroring the item-population loop below */
+    private static itemQualifies(itemName: string, itemsFilter?: string[]): boolean {
+        if (itemsFilter === undefined) {
+            const itemData = FD.items[itemName]
+            if (!itemData) return false
+            if (!itemData.place_result && !itemData.place_as_tile) return false
+            if (itemData.place_result && !FD.entities[itemData.place_result]) return false
+            return true
+        }
+        return itemsFilter.includes(itemName)
+    }
+
+    /** Widen the dialog if more group tabs need to fit than the base layout was designed for */
+    private static computeWidth(itemsFilter?: string[]): number {
+        let groupCount = 0
+        for (const group of FD.inventoryLayout) {
+            if (group.name === 'creative' && itemsFilter !== undefined) continue
+            const hasItems = group.subgroups.some(subgroup =>
+                subgroup.items.some(item => InventoryDialog.itemQualifies(item.name, itemsFilter))
+            )
+            if (hasItems) groupCount += 1
+        }
+        return Math.max(InventoryDialog.BASE_WIDTH, groupCount * 70 + 22)
+    }
+
     public constructor(
         title = 'Inventory',
         itemsFilter?: string[],
-        selectedCallBack?: (selectedItem: string) => void
+        selectedCallBack?: (selectedItem: string) => void,
+        showRecipePanel = true
     ) {
-        super(404, 442, title)
+        super(InventoryDialog.computeWidth(itemsFilter), 442 + (showRecipePanel ? 78 : 0), title)
 
         this.m_InventoryGroups = new Container()
         this.m_InventoryGroups.position.set(12, 46)
@@ -164,34 +193,37 @@ export class InventoryDialog extends Dialog {
             }
         }
 
-        const recipePanel = new Container()
-        recipePanel.position.set(0, 442)
-        this.addChild(recipePanel)
-
-        const recipeBackground = F.DrawRectangle(
-            404,
-            78,
-            colors.dialog.background.color,
-            colors.dialog.background.alpha,
-            colors.dialog.background.border
-        )
-        recipeBackground.position.set(0, 0)
-        recipePanel.addChild(recipeBackground)
-
         this.m_RecipeLabel = new Text({ text: '', style: styles.dialog.label })
-        this.m_RecipeLabel.position.set(12, 10)
-        recipePanel.addChild(this.m_RecipeLabel)
-
         this.m_RecipeContainer = new Container()
-        this.m_RecipeContainer.position.set(12, 36)
-        recipePanel.addChild(this.m_RecipeContainer)
+
+        if (showRecipePanel) {
+            const recipePanel = new Container()
+            recipePanel.position.set(0, 442)
+            this.addChild(recipePanel)
+
+            const recipeBackground = F.DrawRectangle(
+                this.width,
+                78,
+                colors.dialog.background.color,
+                colors.dialog.background.alpha,
+                colors.dialog.background.border
+            )
+            recipeBackground.position.set(0, 0)
+            recipePanel.addChild(recipeBackground)
+
+            this.m_RecipeLabel.position.set(12, 10)
+            recipePanel.addChild(this.m_RecipeLabel)
+
+            this.m_RecipeContainer.position.set(12, 36)
+            recipePanel.addChild(this.m_RecipeContainer)
+        }
     }
 
     /** Override automatically set position of dialog due to additional area for recipe */
     protected override setPosition(): void {
         this.position.set(
             G.app.screen.width / 2 - this.width / 2,
-            G.app.screen.height / 2 - 520 / 2
+            G.app.screen.height / 2 - this.height / 2
         )
     }
 
