@@ -895,36 +895,45 @@ export class BlueprintContainer extends Container {
     public spawnPaintContainer(itemNameOrEntities: string | Entity[], direction = 0): void {
         if (this.mode === EditorMode.PAINT) {
             this.paintContainer.destroy()
+            this.paintContainer = undefined
+            this.setMode(EditorMode.NONE)
+        }
+
+        try {
+            if (typeof itemNameOrEntities === 'string') {
+                const itemData = FD.items[itemNameOrEntities]
+                const wireResult =
+                    WiresPanel.Wires.includes(itemNameOrEntities) && itemNameOrEntities
+                const tileResult = itemData.place_as_tile && itemData.place_as_tile.result
+                const placeResult = itemData.place_result || tileResult || wireResult
+
+                if (wireResult) {
+                    this.paintContainer = this.wirePaintSlot.addChild(
+                        new PaintWireContainer(this, placeResult)
+                    )
+                } else if (tileResult) {
+                    this.paintContainer = this.tilePaintSlot.addChild(
+                        new PaintTileContainer(this, placeResult)
+                    )
+                } else {
+                    this.paintContainer = this.entityPaintSlot.addChild(
+                        new PaintEntityContainer(this, placeResult, direction)
+                    )
+                }
+            } else {
+                this.paintContainer = this.entityPaintSlot.addChild(
+                    new PaintBlueprintContainer(this, itemNameOrEntities)
+                )
+            }
+        } catch (e) {
+            console.error(e)
+            G.logger({ text: 'Could not start placing this item.', type: 'warning' })
+            return
         }
 
         this.updateHoverContainer(true)
         this.setMode(EditorMode.PAINT)
         this.cursor = 'pointer'
-
-        if (typeof itemNameOrEntities === 'string') {
-            const itemData = FD.items[itemNameOrEntities]
-            const wireResult = WiresPanel.Wires.includes(itemNameOrEntities) && itemNameOrEntities
-            const tileResult = itemData.place_as_tile && itemData.place_as_tile.result
-            const placeResult = itemData.place_result || tileResult || wireResult
-
-            if (wireResult) {
-                this.paintContainer = this.wirePaintSlot.addChild(
-                    new PaintWireContainer(this, placeResult)
-                )
-            } else if (tileResult) {
-                this.paintContainer = this.tilePaintSlot.addChild(
-                    new PaintTileContainer(this, placeResult)
-                )
-            } else {
-                this.paintContainer = this.entityPaintSlot.addChild(
-                    new PaintEntityContainer(this, placeResult, direction)
-                )
-            }
-        } else {
-            this.paintContainer = this.entityPaintSlot.addChild(
-                new PaintBlueprintContainer(this, itemNameOrEntities)
-            )
-        }
 
         if (!this.isPointerInside) {
             this.paintContainer.hide()
