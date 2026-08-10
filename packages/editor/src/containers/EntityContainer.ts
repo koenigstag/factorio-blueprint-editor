@@ -83,6 +83,10 @@ export class EntityContainer {
             }
         }
 
+        const onDisplayPanelIconChange = (): void => {
+            this.redraw()
+        }
+
         const onEntityDestroy = (): void => {
             this.redrawSurroundingEntities()
 
@@ -110,6 +114,7 @@ export class EntityContainer {
         this.m_Entity.on('filters', this.redrawEntityInfo, this)
         this.m_Entity.on('splitterInputPriority', this.redrawEntityInfo, this)
         this.m_Entity.on('splitterOutputPriority', this.redrawEntityInfo, this)
+        this.m_Entity.on('displayPanelIcon', onDisplayPanelIconChange)
 
         this.m_Entity.on('destroy', onEntityDestroy)
 
@@ -123,6 +128,7 @@ export class EntityContainer {
             this.m_Entity.off('filters', this.redrawEntityInfo, this)
             this.m_Entity.off('splitterInputPriority', this.redrawEntityInfo, this)
             this.m_Entity.off('splitterOutputPriority', this.redrawEntityInfo, this)
+            this.m_Entity.off('displayPanelIcon', onDisplayPanelIconChange)
 
             this.m_Entity.off('destroy', onEntityDestroy)
         })

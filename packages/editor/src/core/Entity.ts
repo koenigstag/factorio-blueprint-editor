@@ -61,6 +61,7 @@ export interface EntityEvents {
     requestFromBufferChest: []
     station: []
     manualTrainsLimit: []
+    displayPanelIcon: [icon: ISignal]
 }
 
 /** Entity Base Class */
@@ -997,6 +998,14 @@ export class Entity extends EventEmitter<EntityEvents> {
     public get displayPanelIcon(): ISignal {
         if (this.type !== 'display-panel') return undefined
         return this.m_rawEntity.icon || this.m_rawEntity.control_behavior?.parameters?.[0]?.icon
+    }
+    public set displayPanelIcon(icon: ISignal) {
+        if (this.m_rawEntity.icon === icon) return
+
+        this.m_BP.history
+            .updateValue(this.m_rawEntity, 'icon', icon, 'Change display panel icon')
+            .onDone(() => this.emit('displayPanelIcon', this.displayPanelIcon))
+            .commit()
     }
 
     public get mayCraftWithFluid(): boolean {
