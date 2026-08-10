@@ -45,7 +45,7 @@ export class DisplayPanelEditor extends Editor {
 
         const alwaysShow = new Checkbox(
             entity.displayPanelAlwaysShow,
-            'Always show text above entity'
+            "Always show text in 'Alt-mode'"
         )
         alwaysShow.position.set(12, 168)
         this.addChild(alwaysShow)
